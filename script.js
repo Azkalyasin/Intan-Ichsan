@@ -49,31 +49,37 @@ document.addEventListener('DOMContentLoaded', () => {
     const starsContainerEl = document.getElementById('stars-container');
 
     openBtn.addEventListener('click', () => {
-        // Play Audio
-        bgAudio.play().catch(error => console.log("Audio play failed:", error));
+        // Play Audio (Don't let it block the animation if it fails)
+        if (bgAudio) {
+            bgAudio.play().catch(e => console.log("Audio play deferred or failed"));
+        }
         
         // Hide button
         openBtn.classList.add('hide');
 
-        // Small delay to let button fade start, then trigger portal
+        // Start animations immediately
         setTimeout(() => {
-            sliderContainer.classList.add('open');
-            heartIcon.classList.add('expand');
-            starsContainerEl.classList.add('show');
+            if (sliderContainer) {
+                sliderContainer.style.opacity = '1'; // Pastikan langsung terlihat
+                sliderContainer.classList.add('open');
+            }
+            if (heartIcon) heartIcon.classList.add('expand');
+            if (starsContainerEl) starsContainerEl.classList.add('show');
             
-            // Wait for portal animation to finish (3.5s)
+            // Wait for portal animation
             setTimeout(() => {
                 openingScreen.style.opacity = '0';
                 
                 // Start the carousel
-                slideTimer = setInterval(nextSlide, slideInterval);
+                if (typeof nextSlide === 'function') {
+                    slideTimer = setInterval(nextSlide, slideInterval);
+                }
                 
-                // Completely hide opening screen after its opacity fades
                 setTimeout(() => {
                     openingScreen.style.display = 'none';
                 }, 1500);
-            }, 3500);
-        }, 100);
+            }, 3000);
+        }, 50);
     });
 
 });

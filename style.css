@@ -1,10 +1,12 @@
 :root {
+    --sage-green: #B2AC88;
+    --sage-light: #D1CDA7;
     --deep-navy: #0A192F;
     --gold: #D4AF37;
     --gold-light: #F1D279;
     --cream: #FFFDD0;
-    --white-soft: rgba(255, 255, 255, 0.9);
-    --glass: rgba(10, 25, 47, 0.7);
+    --white: #FFFFFF;
+    --glass-white: rgba(255, 255, 255, 0.85);
     --font-heading: 'Playfair Display', serif;
     --font-body: 'Montserrat', sans-serif;
 }
@@ -73,7 +75,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 10; /* Changed to 10 to be above opening screen during expansion */
+    z-index: 2; /* Di bawah opening-screen (z-index 5) */
     opacity: 0;
     pointer-events: none;
     
@@ -92,6 +94,7 @@ body {
 
 .slider-container.open {
     opacity: 1;
+    z-index: 10; /* Berada di atas opening-screen (z-index 5) */
     -webkit-mask-size: 6000px;
     mask-size: 6000px;
     pointer-events: auto;
@@ -107,13 +110,15 @@ body {
     background-repeat: no-repeat;
     background-position: center;
     opacity: 0;
-    transition: opacity 1.5s ease-in-out, transform 8s linear;
+    transition: opacity 2s ease-in-out, transform 8s linear, filter 2s ease;
     transform: scale(1.1);
+    filter: blur(10px);
 }
 
 .slide.active {
     opacity: 1;
     transform: scale(1);
+    filter: blur(0);
 }
 
 .overlay {
@@ -223,11 +228,10 @@ body {
 }
 
 .heart-wrapper {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
+    position: relative; /* Diubah dari absolute ke relative agar mengikuti alur Flexbox */
     width: 120px;
     height: 120px;
+    margin-bottom: 40px; /* Memberikan jarak otomatis ke tombol di bawahnya */
 }
 
 .heart-icon {
@@ -247,16 +251,15 @@ body {
 }
 
 .btn-open-wrapper {
-    position: absolute;
-    top: 50%; left: 50%;
-    transform: translate(-50%, 100px);
+    position: relative; /* Diubah ke relative */
+    z-index: 100; /* Pastikan tombol berada di paling depan */
 }
 
 .btn-open {
     padding: 1rem 3rem;
     background: transparent;
-    border: 1.5px solid var(--gold);
-    color: var(--gold);
+    border: 1.5px solid var(--sage-green);
+    color: var(--sage-green);
     font-family: var(--font-body);
     font-weight: 600;
     font-size: 1.1rem;
@@ -270,9 +273,9 @@ body {
 }
 
 .btn-open:hover {
-    background: var(--gold);
-    color: var(--deep-navy);
-    box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    background: var(--sage-green);
+    color: var(--white);
+    box-shadow: 0 0 20px rgba(178, 172, 136, 0.4);
     transform: translateY(-3px);
 }
 
