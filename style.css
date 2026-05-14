@@ -89,7 +89,8 @@ body {
     mask-repeat: no-repeat;
     mask-size: 120px;
     
-    transition: opacity 0.5s ease, -webkit-mask-size 3.5s cubic-bezier(0.77, 0, 0.175, 1), mask-size 3.5s cubic-bezier(0.77, 0, 0.175, 1);
+    /* Sped up 30%: was 3.5s → 2.45s */
+    transition: opacity 0.5s ease, -webkit-mask-size 2.45s cubic-bezier(0.77, 0, 0.175, 1), mask-size 2.45s cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 .slider-container.open {
@@ -106,11 +107,12 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-size: contain; /* Menggunakan contain agar gambar tidak terpotong */
+    background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
     opacity: 0;
-    transition: opacity 2s ease-in-out, transform 8s linear, filter 2s ease;
+    /* Sped up 30%: was 2s/8s/2s → 1.4s/5.6s/1.4s */
+    transition: opacity 1.4s ease-in-out, transform 5.6s linear, filter 1.4s ease;
     transform: scale(1.1);
     filter: blur(10px);
 }
@@ -137,31 +139,139 @@ body {
     left: 0;
     width: 100%;
     display: flex;
-    justify-content: center;
-    gap: 20px;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
     z-index: 100;
     pointer-events: auto;
 }
 
+.nav-arrows {
+    display: flex;
+    gap: 16px;
+}
+
 .nav-btn {
-    padding: 0.8rem 2rem;
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(5px);
-    border: 1px solid var(--sage-green);
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1.5px solid var(--sage-green);
     color: var(--sage-green);
-    font-family: var(--font-body);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    font-size: 1.4rem;
+    line-height: 1;
     cursor: pointer;
-    border-radius: 30px;
-    transition: all 0.3s ease;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.28s ease;
+    /* Sped up 30%: was 0.3s → 0.21s */
 }
 
 .nav-btn:hover {
     background: var(--sage-green);
     color: white;
     transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(178, 172, 136, 0.4);
+}
+
+.nav-btn.hidden {
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* Maps Button */
+.maps-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0.6rem 1.6rem;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1.5px solid var(--sage-green);
+    color: var(--sage-green);
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 30px;
+    transition: all 0.28s ease;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(6px);
+}
+
+.maps-btn.show {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.maps-btn:hover {
+    background: var(--sage-green);
+    color: white;
+    box-shadow: 0 4px 15px rgba(178, 172, 136, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Music Toggle Button */
+.music-btn {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 1000;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1.5px solid var(--sage-green);
+    color: var(--sage-green);
+    cursor: pointer;
+    display: none; /* Hidden until invitation opens */
+    align-items: center;
+    justify-content: center;
+    transition: all 0.28s ease;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    /* Spinning animation for music note */
+    animation: none;
+}
+
+.music-btn.visible {
+    display: flex;
+}
+
+.music-btn:hover {
+    background: var(--sage-green);
+    color: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 16px rgba(178, 172, 136, 0.4);
+}
+
+.music-icon {
+    width: 22px;
+    height: 22px;
+    transition: opacity 0.2s ease;
+}
+
+.music-icon.hidden {
+    display: none;
+}
+
+/* Rotating note animation when playing */
+@keyframes spin-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.music-btn.playing .music-icon:not(.hidden) {
+    animation: spin-slow 3s linear infinite;
 }
 
 /* Content Layout */
@@ -258,7 +368,8 @@ body {
     align-items: center;
     z-index: 5;
     background-color: #FEFBE6;
-    transition: opacity 1.5s ease;
+    /* Sped up 30%: was 1.5s → 1.05s */
+    transition: opacity 1.05s ease;
 }
 
 .heart-wrapper {
@@ -275,7 +386,8 @@ body {
     background-size: contain;
     background-repeat: no-repeat;
     background-position: center;
-    transition: transform 3.5s cubic-bezier(0.77, 0, 0.175, 1), opacity 2.5s ease 0.5s;
+    /* Sped up 30%: heart expand was 3.5s → 2.45s, opacity was 2.5s → 1.75s */
+    transition: transform 2.45s cubic-bezier(0.77, 0, 0.175, 1), opacity 1.75s ease 0.35s;
     filter: drop-shadow(0 0 15px rgba(212, 175, 55, 0.4));
 }
 
@@ -326,7 +438,8 @@ body {
 
 .fade-in {
     opacity: 0;
-    animation: fadeIn 1s ease-out 1s forwards;
+    /* Sped up 30%: was 1s → 0.7s */
+    animation: fadeIn 0.7s ease-out 0.7s forwards;
 }
 
 @keyframes slideUp {
