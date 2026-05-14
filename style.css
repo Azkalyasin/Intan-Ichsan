@@ -130,6 +130,40 @@ body {
     background: transparent; /* Overlay gelap dihapus agar gambar terlihat asli */
 }
 
+/* Slider Navigation */
+.slider-nav {
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    z-index: 100;
+    pointer-events: auto;
+}
+
+.nav-btn {
+    padding: 0.8rem 2rem;
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(5px);
+    border: 1px solid var(--sage-green);
+    color: var(--sage-green);
+    font-family: var(--font-body);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    cursor: pointer;
+    border-radius: 30px;
+    transition: all 0.3s ease;
+}
+
+.nav-btn:hover {
+    background: var(--sage-green);
+    color: white;
+    transform: translateY(-2px);
+}
+
 /* Content Layout */
 .content {
     position: relative;

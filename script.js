@@ -40,6 +40,12 @@ document.addEventListener('DOMContentLoaded', () => {
         slides[currentSlide].classList.add('active');
     }
 
+    function prevSlide() {
+        slides[currentSlide].classList.remove('active');
+        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+        slides[currentSlide].classList.add('active');
+    }
+
     // 3. Opening Animation Logic
     const openBtn = document.getElementById('openBtn');
     const heartIcon = document.getElementById('heartIcon');
@@ -70,10 +76,12 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 openingScreen.style.opacity = '0';
                 
-                // Start the carousel
-                if (typeof nextSlide === 'function') {
-                    slideTimer = setInterval(nextSlide, slideInterval);
-                }
+                // Manual Navigation Listeners
+                const nextBtn = document.getElementById('nextBtn');
+                const prevBtn = document.getElementById('prevBtn');
+                
+                if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+                if (prevBtn) prevBtn.addEventListener('click', prevSlide);
                 
                 setTimeout(() => {
                     openingScreen.style.display = 'none';
