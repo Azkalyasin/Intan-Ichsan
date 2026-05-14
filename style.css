@@ -381,13 +381,16 @@ body {
 }
 
 .heart-wrapper {
-    /* Positioned at EXACT screen center to match the CSS mask-position: center */
-    position: absolute;
+    /* Fixed at EXACT screen center — matches CSS mask-position:center */
+    /* Sits above everything (z-index 25) and is independent of opening-screen */
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 120px;
     height: 120px;
+    z-index: 25;
+    pointer-events: none;
 }
 
 .heart-icon {

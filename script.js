@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const starsContainerEl = document.getElementById('stars-container');
     const openBtn          = document.getElementById('openBtn');
     const heartIcon        = document.getElementById('heartIcon');
+    const heartWrapper     = document.getElementById('heartWrapper');
     const sliderContainer  = document.getElementById('sliderContainer');
     const bgAudio          = document.getElementById('bg-audio');
     const openingScreen    = document.getElementById('openingScreen');
@@ -138,36 +139,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Small tick to let repaint happen, then start animations
         setTimeout(() => {
-            // Start portal expand
+            // ─ INSTANT hide opening-screen background ─────────────────────────
+            // No opacity fade — immediately gone so it can NEVER linger over slides.
+            // The heart-wrapper is now a separate fixed element (z-index 25),
+            // so it animates independently regardless of opening-screen visibility.
+            openingScreen.style.display = 'none';
+
+            // ─ Start portal expand ────────────────────────────────────────────
             if (sliderContainer) {
                 sliderContainer.style.opacity = '1';
                 sliderContainer.classList.add('open');
             }
+
+            // ─ Heart expands (independent element, z-index 25 above slider) ──
             if (heartIcon) heartIcon.classList.add('expand');
             if (starsContainerEl) starsContainerEl.classList.add('show');
 
-            // HEART-LINGERING FIX: immediately start fading the opening-screen
-            // the moment the portal starts expanding. The slider (z-index 10) is
-            // already above the opening-screen (z-index 5), so as the portal mask
-            // expands, the opening-screen fades out at the same time.
-            openingScreen.style.opacity = '0';
-
-            // Wire up navigation (safe to do right away)
+            // ─ Wire up nav immediately ────────────────────────────────────────
             updateNavButtons();
             nextBtn.addEventListener('click', goNext);
             prevBtn.addEventListener('click', goPrev);
 
-            // Show music button
+            // ─ Show music button ──────────────────────────────────────────────
             musicBtn.classList.add('visible');
             musicBtn.classList.add('playing');
 
-            // Hard-remove opening screen after its opacity transition finishes (1.05s)
+            // ─ Hide heart-wrapper after its animation fully completes ─────────
+            // heart opacity transition: 1.75s + 0.35s delay = ~2.1s total
             setTimeout(() => {
-                openingScreen.style.display = 'none';
-            }, 1100);
+                if (heartWrapper) heartWrapper.style.display = 'none';
+            }, 2200);
 
         }, 50);
     });
-
 
 });
