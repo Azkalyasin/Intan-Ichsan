@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const slides = document.querySelectorAll('.slide');
     let currentSlide = 0;
     const slideInterval = 6000; // 6 seconds
+    let slideTimer;
 
     function nextSlide() {
         slides[currentSlide].classList.remove('active');
@@ -39,6 +40,40 @@ document.addEventListener('DOMContentLoaded', () => {
         slides[currentSlide].classList.add('active');
     }
 
-    setInterval(nextSlide, slideInterval);
+    // 3. Opening Animation Logic
+    const openBtn = document.getElementById('openBtn');
+    const heartIcon = document.getElementById('heartIcon');
+    const sliderContainer = document.getElementById('sliderContainer');
+    const bgAudio = document.getElementById('bg-audio');
+    const openingScreen = document.getElementById('openingScreen');
+    const starsContainerEl = document.getElementById('stars-container');
+
+    openBtn.addEventListener('click', () => {
+        // Play Audio
+        bgAudio.play().catch(error => console.log("Audio play failed:", error));
+        
+        // Hide button
+        openBtn.classList.add('hide');
+
+        // Small delay to let button fade start, then trigger portal
+        setTimeout(() => {
+            sliderContainer.classList.add('open');
+            heartIcon.classList.add('expand');
+            starsContainerEl.classList.add('show');
+            
+            // Wait for portal animation to finish (3.5s)
+            setTimeout(() => {
+                openingScreen.style.opacity = '0';
+                
+                // Start the carousel
+                slideTimer = setInterval(nextSlide, slideInterval);
+                
+                // Completely hide opening screen after its opacity fades
+                setTimeout(() => {
+                    openingScreen.style.display = 'none';
+                }, 1500);
+            }, 3500);
+        }, 100);
+    });
 
 });
