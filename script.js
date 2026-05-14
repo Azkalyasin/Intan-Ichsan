@@ -126,14 +126,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ─── OPENING ANIMATION ────────────────────────────────────────
     openBtn.addEventListener('click', () => {
-        // Play audio after user interaction
-        bgAudio.play().catch(e => console.log('Audio play deferred:', e));
+        // iOS FIX: play() MUST be called synchronously inside user interaction,
+        // before any setTimeout, otherwise Safari will block it.
+        const playPromise = bgAudio.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(e => console.log('Audio play failed:', e));
+        }
 
         // Hide the open button
         openBtn.classList.add('hide');
 
-        // Trigger portal animation
+        // Small tick to let repaint happen, then start animations
         setTimeout(() => {
+            // Start portal expand
             if (sliderContainer) {
                 sliderContainer.style.opacity = '1';
                 sliderContainer.classList.add('open');
@@ -141,28 +146,28 @@ document.addEventListener('DOMContentLoaded', () => {
             if (heartIcon) heartIcon.classList.add('expand');
             if (starsContainerEl) starsContainerEl.classList.add('show');
 
-            // Wait for portal to finish (sped up 30%: was 3000ms → 2100ms)
+            // HEART-LINGERING FIX: immediately start fading the opening-screen
+            // the moment the portal starts expanding. The slider (z-index 10) is
+            // already above the opening-screen (z-index 5), so as the portal mask
+            // expands, the opening-screen fades out at the same time.
+            openingScreen.style.opacity = '0';
+
+            // Wire up navigation (safe to do right away)
+            updateNavButtons();
+            nextBtn.addEventListener('click', goNext);
+            prevBtn.addEventListener('click', goPrev);
+
+            // Show music button
+            musicBtn.classList.add('visible');
+            musicBtn.classList.add('playing');
+
+            // Hard-remove opening screen after its opacity transition finishes (1.05s)
             setTimeout(() => {
-                openingScreen.style.opacity = '0';
+                openingScreen.style.display = 'none';
+            }, 1100);
 
-                // Initialize nav button visibility
-                updateNavButtons();
-
-                // Wire up navigation
-                nextBtn.addEventListener('click', goNext);
-                prevBtn.addEventListener('click', goPrev);
-
-                // Show music button
-                musicBtn.classList.add('visible');
-                musicBtn.classList.add('playing');
-
-                // Completely remove opening screen
-                setTimeout(() => {
-                    openingScreen.style.display = 'none';
-                }, 1050); // matches opening-screen opacity transition (sped up 30%)
-
-            }, 2100);
         }, 50);
     });
+
 
 });
