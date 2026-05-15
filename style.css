@@ -111,16 +111,14 @@ body {
     background-repeat: no-repeat;
     background-position: center;
     opacity: 0;
-    /* Sped up 30%: was 2s/8s/2s → 1.4s/5.6s/1.4s */
-    transition: opacity 1.4s ease-in-out, transform 5.6s linear, filter 1.4s ease;
-    transform: scale(1.1);
-    filter: blur(10px);
+    transform: translateX(0);
+    will-change: transform, opacity;
+    /* No CSS transition here — all transitions driven by JS inline styles */
 }
 
 .slide.active {
     opacity: 1;
-    transform: scale(1);
-    filter: blur(0);
+    transform: translateX(0);
 }
 
 .overlay {

@@ -9,18 +9,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ─── ELEMENTS ─────────────────────────────────────────────────
     const starsContainerEl = document.getElementById('stars-container');
-    const openBtn          = document.getElementById('openBtn');
-    const heartIcon        = document.getElementById('heartIcon');
-    const heartWrapper     = document.getElementById('heartWrapper');
-    const sliderContainer  = document.getElementById('sliderContainer');
-    const bgAudio          = document.getElementById('bg-audio');
-    const openingScreen    = document.getElementById('openingScreen');
-    const prevBtn          = document.getElementById('prevBtn');
-    const nextBtn          = document.getElementById('nextBtn');
-    const mapsBtn          = document.getElementById('mapsBtn');
-    const musicBtn         = document.getElementById('musicBtn');
-    const musicIconOn      = document.getElementById('musicIconOn');
-    const musicIconOff     = document.getElementById('musicIconOff');
+    const openBtn = document.getElementById('openBtn');
+    const heartIcon = document.getElementById('heartIcon');
+    const heartWrapper = document.getElementById('heartWrapper');
+    const sliderContainer = document.getElementById('sliderContainer');
+    const bgAudio = document.getElementById('bg-audio');
+    const openingScreen = document.getElementById('openingScreen');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const mapsBtn = document.getElementById('mapsBtn');
+    const musicBtn = document.getElementById('musicBtn');
+    const musicIconOn = document.getElementById('musicIconOn');
+    const musicIconOff = document.getElementById('musicIconOff');
 
     // ─── STARS ────────────────────────────────────────────────────
     const starCount = 150;
@@ -28,19 +28,23 @@ document.addEventListener('DOMContentLoaded', () => {
         const star = document.createElement('div');
         star.className = 'star';
         star.style.left = `${Math.random() * 100}%`;
-        star.style.top  = `${Math.random() * 100}%`;
+        star.style.top = `${Math.random() * 100}%`;
         const size = Math.random() * 2 + 1;
-        star.style.width  = `${size}px`;
+        star.style.width = `${size}px`;
         star.style.height = `${size}px`;
         star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
         star.style.animationDelay = `${Math.random() * 5}s`;
         starsContainerEl.appendChild(star);
     }
 
-    // ─── SLIDE STATE ──────────────────────────────────────────────
+    // ─── SLIDE TRANSITION ─────────────────────────────────────────
+    // SLIDE_MOVE_MS  = duration of left/right slide movement
+    // SLIDE_FADE_MS  = duration of content fade-in AFTER slide lands
+    const SLIDE_MOVE_MS = 900;   // ← adjust to speed up/slow down slide movement
+    const SLIDE_FADE_MS = 900;   // ← adjust to speed up/slow down fade-in
+    let isAnimating = false;
     const slides = document.querySelectorAll('.slide');
     let currentSlide = 0;
-    let slideTimer;
     let isPlaying = true; // audio state
 
     function updateNavButtons() {
@@ -65,24 +69,65 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function goToSlide(index) {
-        slides[currentSlide].classList.remove('active');
+    function goToSlide(index, direction) {
+        if (index === currentSlide || isAnimating) return;
+        isAnimating = true;
+
+        const outgoing = slides[currentSlide];
+        const incoming = slides[index];
+
+        const inStart = direction === 'next' ? '100%' : '-100%';
+        const outEnd = direction === 'next' ? '-25%' : '25%';
+
+        // ── PHASE 1 SETUP: snap incoming off-screen, content invisible ──
+        incoming.style.transition = 'none';
+        incoming.style.transform = `translateX(${inStart})`;
+        incoming.style.opacity = '0';
+        incoming.getBoundingClientRect(); // force reflow
+
+        // ── PHASE 1: slide movement (no opacity change on incoming) ──────
+        // Incoming slides in with opacity=0 so content hidden during movement.
+        // Outgoing exits and fades out simultaneously.
+        const moveEase = `cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
+        incoming.style.transition = `transform ${SLIDE_MOVE_MS}ms ${moveEase}`;
+        outgoing.style.transition = `transform ${SLIDE_MOVE_MS}ms ${moveEase}, opacity ${Math.round(SLIDE_MOVE_MS * 0.55)}ms ease`;
+
+        incoming.style.transform = 'translateX(0)'; // slide in
+        incoming.classList.add('active');            // mark as active
+        outgoing.style.transform = `translateX(${outEnd})`; // slide out
+        outgoing.style.opacity = '0';
+
+        // ── PHASE 2: after slide lands → fade-in content smoothly ────────
+        setTimeout(() => {
+            incoming.style.transition = `opacity ${SLIDE_FADE_MS}ms ease-in-out`;
+            incoming.style.opacity = '1';
+
+            // ── CLEANUP after Phase 2 completes ──────────────────────────
+            setTimeout(() => {
+                outgoing.classList.remove('active');
+                [outgoing, incoming].forEach(el => {
+                    el.style.transition = '';
+                    el.style.transform = '';
+                    el.style.opacity = '';
+                });
+                isAnimating = false;
+            }, SLIDE_FADE_MS + 50);
+
+        }, SLIDE_MOVE_MS + 10);
+
         currentSlide = index;
-        slides[currentSlide].classList.add('active');
         updateNavButtons();
     }
 
     function goNext() {
-        if (currentSlide < TOTAL_SLIDES - 1) {
-            goToSlide(currentSlide + 1);
-        }
+        if (currentSlide < TOTAL_SLIDES - 1) goToSlide(currentSlide + 1, 'next');
     }
 
     function goPrev() {
-        if (currentSlide > 0) {
-            goToSlide(currentSlide - 1);
-        }
+        if (currentSlide > 0) goToSlide(currentSlide - 1, 'prev');
     }
+
+
 
     // ─── MUSIC CONTROL ────────────────────────────────────────────
     function setMusicState(playing) {
