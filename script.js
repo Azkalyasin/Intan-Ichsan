@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const musicBtn = document.getElementById('musicBtn');
     const musicIconOn = document.getElementById('musicIconOn');
     const musicIconOff = document.getElementById('musicIconOff');
+    const creativeBtn = document.getElementById('creativeBtn');
 
     // ─── STARS ────────────────────────────────────────────────────
     const starCount = 150;
@@ -66,6 +67,13 @@ document.addEventListener('DOMContentLoaded', () => {
             mapsBtn.classList.add('show');
         } else {
             mapsBtn.classList.remove('show');
+        }
+
+        // Show creative button only on last slide (index 6)
+        if (currentSlide === TOTAL_SLIDES - 1) {
+            creativeBtn.classList.add('show');
+        } else {
+            creativeBtn.classList.remove('show');
         }
     }
 
