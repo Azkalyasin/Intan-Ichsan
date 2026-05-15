@@ -42,14 +42,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // SLIDE_MOVE_MS  = duration of left/right slide movement
     // SLIDE_FADE_MS  = duration of content fade-in AFTER slide lands
     const SLIDE_MOVE_MS = 900;   // ← adjust to speed up/slow down slide movement
-    const SLIDE_FADE_MS = 900;   // ← adjust to speed up/slow down fade-in
+    const SLIDE_FADE_MS = 700;   // ← adjust to speed up/slow down fade-in
     let isAnimating = false;
     const slides = document.querySelectorAll('.slide');
     let currentSlide = 0;
     let isPlaying = true; // audio state
 
     function updateNavButtons() {
-        // Hide prev on first slide, hide next on last slide
+        // Only handles prev/next arrow visibility
         if (currentSlide === 0) {
             prevBtn.classList.add('hidden');
         } else {
@@ -61,19 +61,46 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             nextBtn.classList.remove('hidden');
         }
+    }
 
-        // Show maps button only on slide 5 (index 4)
-        if (currentSlide === MAPS_SLIDE_INDEX) {
-            mapsBtn.classList.add('show');
-        } else {
-            mapsBtn.classList.remove('show');
+    // ── Hide special buttons instantly (when leaving their slide) ──
+    function hideSpecialButtons() {
+        // maps-btn: instant hide via inline style (overrides CSS class)
+        mapsBtn.style.transition = 'none';
+        mapsBtn.style.opacity = '0';
+        mapsBtn.style.pointerEvents = 'none';
+
+        // creative-btn: back to display:none instantly
+        creativeBtn.style.transition = 'none';
+        creativeBtn.style.opacity = '0';
+        creativeBtn.style.display = 'none';
+    }
+
+    // ── Show special button for a given slide, synchronized with Phase 2 ──
+    function showSpecialButtonForSlide(index) {
+        const fadeTransition = `opacity ${SLIDE_FADE_MS}ms ease-in-out`;
+
+        if (index === MAPS_SLIDE_INDEX) {
+            // Inline styles throughout — CSS class opacity is overridden by inline,
+            // so we must set style.opacity='1' directly to trigger the transition.
+            mapsBtn.style.transition = 'none';
+            mapsBtn.style.opacity = '0';
+            mapsBtn.style.pointerEvents = 'none';
+            mapsBtn.getBoundingClientRect(); // force reflow
+            mapsBtn.style.transition = fadeTransition;
+            mapsBtn.style.opacity = '1';         // ← key fix: inline wins over class
+            mapsBtn.style.pointerEvents = 'auto';
+            mapsBtn.classList.add('show');        // keeps transform:translateY(0) from CSS
         }
 
-        // Show creative button only on last slide (index 6)
-        if (currentSlide === TOTAL_SLIDES - 1) {
-            creativeBtn.classList.add('show');
-        } else {
-            creativeBtn.classList.remove('show');
+        if (index === TOTAL_SLIDES - 1) {
+            // creative uses display:none — prep it, then fade in
+            creativeBtn.style.transition = 'none';
+            creativeBtn.style.display = 'inline-flex';
+            creativeBtn.style.opacity = '0';
+            creativeBtn.getBoundingClientRect(); // force reflow
+            creativeBtn.style.transition = fadeTransition;
+            creativeBtn.style.opacity = '1';
         }
     }
 
@@ -87,30 +114,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const inStart = direction === 'next' ? '100%' : '-100%';
         const outEnd = direction === 'next' ? '-25%' : '25%';
 
+        // ── Hide special buttons immediately when leaving their slide ──
+        hideSpecialButtons();
+
         // ── PHASE 1 SETUP: snap incoming off-screen, content invisible ──
         incoming.style.transition = 'none';
         incoming.style.transform = `translateX(${inStart})`;
         incoming.style.opacity = '0';
         incoming.getBoundingClientRect(); // force reflow
 
-        // ── PHASE 1: slide movement (no opacity change on incoming) ──────
-        // Incoming slides in with opacity=0 so content hidden during movement.
-        // Outgoing exits and fades out simultaneously.
+        // ── PHASE 1: slide movement ───────────────────────────────────
         const moveEase = `cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
         incoming.style.transition = `transform ${SLIDE_MOVE_MS}ms ${moveEase}`;
         outgoing.style.transition = `transform ${SLIDE_MOVE_MS}ms ${moveEase}, opacity ${Math.round(SLIDE_MOVE_MS * 0.55)}ms ease`;
 
-        incoming.style.transform = 'translateX(0)'; // slide in
-        incoming.classList.add('active');            // mark as active
-        outgoing.style.transform = `translateX(${outEnd})`; // slide out
+        incoming.style.transform = 'translateX(0)';
+        incoming.classList.add('active');
+        outgoing.style.transform = `translateX(${outEnd})`;
         outgoing.style.opacity = '0';
 
-        // ── PHASE 2: after slide lands → fade-in content smoothly ────────
+        // ── PHASE 2: fade-in content + special buttons simultaneously ──
         setTimeout(() => {
             incoming.style.transition = `opacity ${SLIDE_FADE_MS}ms ease-in-out`;
             incoming.style.opacity = '1';
 
-            // ── CLEANUP after Phase 2 completes ──────────────────────────
+            // Fade in the special button for this slide (same timing as content)
+            showSpecialButtonForSlide(index);
+
+            // ── CLEANUP ───────────────────────────────────────────────
             setTimeout(() => {
                 outgoing.classList.remove('active');
                 [outgoing, incoming].forEach(el => {
@@ -118,6 +149,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     el.style.transform = '';
                     el.style.opacity = '';
                 });
+                // Reset button transition overrides
+                mapsBtn.style.transition = '';
+                creativeBtn.style.transition = '';
                 isAnimating = false;
             }, SLIDE_FADE_MS + 50);
 
@@ -126,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentSlide = index;
         updateNavButtons();
     }
+
 
     function goNext() {
         if (currentSlide < TOTAL_SLIDES - 1) goToSlide(currentSlide + 1, 'next');
